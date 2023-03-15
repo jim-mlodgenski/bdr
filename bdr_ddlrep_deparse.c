@@ -121,6 +121,7 @@ bdr_queue_ddl_commands(PG_FUNCTION_ARGS)
 	 * pretty easy to fix the issue anyway.
 	 */
 	SPI_connect();
+	PushActiveSnapshot(GetTransactionSnapshot());
 	tupcxt = AllocSetContextCreate(CurrentMemoryContext,
 								   "per-tuple DDL queue cxt",
 								   ALLOCSET_DEFAULT_MINSIZE,
@@ -171,6 +172,7 @@ bdr_queue_ddl_commands(PG_FUNCTION_ARGS)
 	}
 
 	SPI_finish();
+	PopActiveSnapshot();
 
 	PG_RETURN_VOID();
 }
@@ -246,6 +248,7 @@ bdr_queue_dropped_objects(PG_FUNCTION_ARGS)
 	 * released when we disconnect.
 	 */
 	SPI_connect();
+	PushActiveSnapshot(GetTransactionSnapshot());
 
 	res = SPI_execute("SELECT "
 					  "   original, normal, object_type, "
@@ -307,6 +310,7 @@ bdr_queue_dropped_objects(PG_FUNCTION_ARGS)
 	}
 
 	SPI_finish();
+	PopActiveSnapshot();
 
 	/* No objects dropped? */
 	if (droppedcnt == 0)

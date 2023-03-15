@@ -2805,8 +2805,10 @@ bdr_apply_main(Datum main_arg)
 	 */
 	StartTransactionCommand();
 	SPI_connect();
+	PushActiveSnapshot(GetTransactionSnapshot());
 	status = bdr_nodes_get_local_status(&bdr_apply_worker->remote_node);
 	SPI_finish();
+	PopActiveSnapshot();
 	CommitTransactionCommand();
 	if (status == BDR_NODE_STATUS_KILLED)
 	{

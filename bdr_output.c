@@ -57,6 +57,7 @@
 #include "utils/lsyscache.h"
 #include "utils/memutils.h"
 #include "utils/rel.h"
+#include "utils/snapmgr.h"
 #include "utils/syscache.h"
 #include "utils/timestamp.h"
 #include "utils/typcache.h"
@@ -288,6 +289,7 @@ bdr_ensure_node_ready(BdrOutputData *data)
 	spi_ret = SPI_connect();
 	if (spi_ret != SPI_OK_CONNECT)
 		elog(ERROR, "Local SPI connect failed; shouldn't happen");
+	PushActiveSnapshot(GetTransactionSnapshot());
 
 	our_status = bdr_local_node_status();
 
@@ -299,6 +301,7 @@ bdr_ensure_node_ready(BdrOutputData *data)
 	}
 
 	SPI_finish();
+	PopActiveSnapshot();
 
 	if (remote_status == BDR_NODE_STATUS_KILLED)
 	{
